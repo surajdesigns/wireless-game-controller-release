@@ -1,0 +1,35 @@
+{
+  "name": "wireless-game-controller",
+  "version": "1.0.0",
+  "description": "Use your iPhone as a wireless Xbox-style game controller for macOS games via a web-based virtual gamepad and native Mac companion.",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "test": "node test/state_test.js && node test/session_test.js && node test/integration_test.js",
+    "test:state": "node test/state_test.js",
+    "test:session": "node test/session_test.js",
+    "test:integration": "node test/integration_test.js",
+    "dev": "node server/server.js",
+    "build": "echo 'No build step required — zero-dependency project'"
+  },
+  "keywords": [
+    "game-controller",
+    "iphone",
+    "macos",
+    "gamepad",
+    "websocket",
+    "xbox-controller",
+    "virtual-gamepad",
+    "wireless-controller"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "private": true
+}

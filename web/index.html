@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#070a12">
+  <title>Wireless Game Controller for Mac</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ======================================================================
+       SCREEN 1: Device Selection ("How are you using this device?")
+       ====================================================================== -->
+  <section id="screen-device-select" class="app-screen device-select-screen">
+    <div class="selection-card-container">
+      <div class="brand-hero">
+        <div class="controller-badge-icon">🎮</div>
+        <h1 class="hero-title">Wireless Game Controller</h1>
+        <p class="hero-subtitle">Encrypted Low-Latency Controller System for Apple Silicon Mac</p>
+      </div>
+
+      <div class="question-box">
+        <h2 class="question-text">How are you using this device?</h2>
+      </div>
+
+      <div class="device-options-grid">
+        <!-- Option A: Mac Host -->
+        <button id="btn-select-mac" class="device-card-btn mac-card" aria-label="Use on Mac">
+          <div class="card-icon-wrap">
+            <span class="card-icon">💻</span>
+          </div>
+          <div class="card-content">
+            <h3 class="card-title">Using on Mac</h3>
+            <p class="card-desc">Host a pairing session and receive controller inputs for games running on this Mac.</p>
+            <div class="card-action-hint">Host Gamepad Session →</div>
+          </div>
+        </button>
+
+        <!-- Option B: iPhone Client -->
+        <button id="btn-select-iphone" class="device-card-btn iphone-card" aria-label="Use on iPhone">
+          <div class="card-icon-wrap">
+            <span class="card-icon">📱</span>
+          </div>
+          <div class="card-content">
+            <h3 class="card-title">Using on iPhone</h3>
+            <p class="card-desc">Scan a QR code or enter a code to use this iPhone as an ultra-responsive game controller.</p>
+            <div class="card-action-hint">Connect Virtual Gamepad →</div>
+          </div>
+        </button>
+      </div>
+
+      <div class="security-footer-note">
+        <span class="shield-icon">🛡️</span> Single-Use Cryptographic Pairing Tokens • Zero Inbound Ports Required
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       SCREEN 2: Mac Host Dashboard
+       ====================================================================== -->
+  <section id="screen-mac-host" class="app-screen host-screen hidden">
+    <div class="host-dashboard-card">
+      <header class="host-header">
+        <div class="host-header-left">
+          <button id="btn-mac-back" class="nav-back-btn">← Switch Role</button>
+          <h2>Mac Host Pairing Dashboard</h2>
+        </div>
+        <div class="host-header-right">
+          <span id="mac-host-status" class="status-pill-sub">Initializing...</span>
+        </div>
+      </header>
+
+      <div class="host-content-grid">
+        <!-- Left: Real QR Code -->
+        <div class="qr-panel">
+          <div class="qr-frame">
+            <div id="mac-qr-container" class="qr-svg-holder">
+              <!-- Dynamically populated with real SVG QR code -->
+            </div>
+          </div>
+          <div class="qr-instructions">
+            Scan this QR code with your iPhone camera to instantly pair.
+          </div>
+        </div>
+
+        <!-- Right: Code & Session Status -->
+        <div class="session-info-panel">
+          <div class="code-display-group">
+            <span class="code-label">PAIRING CODE</span>
+            <div class="code-number-box">
+              <span id="mac-session-code" class="code-digits">--- ---</span>
+            </div>
+            <p class="code-hint">Enter this 6-character code on your iPhone if camera is unavailable.</p>
+          </div>
+
+          <div class="status-metrics-card">
+            <div class="metric-row">
+              <span class="metric-name">Session Expiration:</span>
+              <span id="mac-timer-countdown" class="metric-val timer-val">05:00</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-name">Connected Controller:</span>
+              <span id="mac-peer-status" class="status-tag waiting">🟡 Awaiting Connection</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-name">Transport Encryption:</span>
+              <span class="metric-val">WSS (TLS 1.3) Authenticated</span>
+            </div>
+          </div>
+
+          <div class="host-action-buttons">
+            <button id="btn-mac-regen" class="btn-secondary">🔄 Generate New Code</button>
+            <button id="btn-mac-revoke" class="btn-danger">🚫 Revoke Session</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       SCREEN 3: iPhone Mobile Pairing Screen
+       ====================================================================== -->
+  <section id="screen-iphone-pair" class="app-screen iphone-pair-screen hidden">
+    <div class="iphone-pairing-card">
+      <header class="iphone-pair-header">
+        <button id="btn-iphone-back" class="nav-back-btn">← Back</button>
+        <h2>Connect to Mac</h2>
+      </header>
+
+      <!-- Option 1: Camera QR Scan -->
+      <div class="pairing-method-block">
+        <div class="camera-security-notice hidden"></div>
+        <button id="btn-open-camera-scanner" class="btn-primary camera-scan-btn">
+          <span class="btn-icon">📷</span> Scan Mac QR Code
+        </button>
+        <span class="or-divider">── OR ENTER CODE MANUALLY ──</span>
+      </div>
+
+      <!-- Option 2: Manual Code Input -->
+      <div class="manual-code-form">
+        <label for="iphone-code-input" class="manual-code-label">6-Character Pairing Code</label>
+        <input 
+          type="text" 
+          id="iphone-code-input" 
+          class="manual-code-input" 
+          placeholder="e.g. 7KX-924" 
+          maxlength="7" 
+          autocomplete="off" 
+          autocapitalize="characters"
+          spellcheck="false"
+        >
+        <button id="btn-submit-code" class="btn-primary submit-code-btn">
+          Connect Controller
+        </button>
+      </div>
+
+      <!-- Feedback / Errors -->
+      <div id="iphone-error-msg" class="error-banner hidden"></div>
+      <div id="iphone-pairing-spinner" class="spinner-banner hidden">
+        <span class="spinner-circle"></span> Authenticating session...
+      </div>
+
+      <div class="pairing-security-note">
+        Sessions expire in 5 minutes. After 5 incorrect attempts, pairing is locked out for 60 seconds to protect against brute-force attacks.
+      </div>
+    </div>
+
+    <!-- Camera Scanner Modal Overlay -->
+    <div id="modal-camera-scanner" class="modal-backdrop hidden">
+      <div class="camera-modal-box">
+        <div class="camera-modal-header">
+          <h3>Scan Mac Screen QR Code</h3>
+          <button id="btn-close-scanner" class="modal-close">&times;</button>
+        </div>
+        <div class="camera-viewport-wrap">
+          <video id="camera-preview-video" class="camera-video" playsinline></video>
+          <div class="camera-reticle"></div>
+        </div>
+        <div class="camera-modal-footer">
+          Point camera at the QR code on your Mac screen.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       SCREEN 4: Full Xbox-Style Virtual Gamepad (The Existing Controller)
+       ====================================================================== -->
+  <section id="screen-controller" class="app-screen controller-screen hidden">
+    
+    <!-- Portrait orientation warning overlay -->
+    <div id="orientation-overlay" class="orientation-overlay">
+      <div class="orientation-card">
+        <div class="rotate-icon">🔄</div>
+        <h2>Rotate to Landscape</h2>
+        <p>This Xbox controller layout is engineered for two-thumb landscape gameplay on iPhone.</p>
+      </div>
+    </div>
+
+    <!-- Main Gamepad Chassis -->
+    <div id="gamepad-root" class="gamepad-root">
+      
+      <!-- Top Status Bar & Shoulder Triggers Layer -->
+      <header class="controller-header">
+        
+        <!-- Left Shoulder Corner (LT & LB) -->
+        <div class="shoulder-group left-shoulders">
+          <button id="btn-lt" class="trigger-btn" data-input="LT" aria-label="Left Trigger Aim">
+            <div class="trigger-body">
+              <span class="trigger-name">LT</span>
+              <span class="action-tag">Aim</span>
+            </div>
+          </button>
+          <button id="btn-lb" class="bumper-btn" data-input="LB" aria-label="Left Bumper Guard">
+            <div class="bumper-lightbar"></div>
+            <div class="bumper-body">
+              <span class="bumper-name">LB</span>
+              <span class="action-tag">Guard</span>
+            </div>
+          </button>
+        </div>
+
+        <!-- Center Status Bar -->
+        <div class="top-status-bar">
+          <div class="status-pill">
+            <span class="status-indicator"></span>
+            <span id="connection-status-text" class="status-title">Connected</span>
+            <span class="status-sep">|</span>
+            <span class="device-icon">💻</span>
+            <span class="device-name">MacBook Pro</span>
+            <span class="status-sep">|</span>
+            <span class="ping-icon">📶</span>
+            <span id="ping-readout" class="ping-text">0 ms</span>
+          </div>
+
+          <div class="header-action-icons">
+            <button id="btn-open-settings" class="top-icon-btn" title="Settings & Mappings" aria-label="Settings">⚙️</button>
+            <button id="btn-open-log" class="top-icon-btn" title="Input Event Log" aria-label="Event Log">📊</button>
+            <button id="btn-open-pairing" class="top-icon-btn" title="Pair Device" aria-label="Pair">🔗</button>
+            <button id="btn-controller-disconnect" class="top-icon-btn" title="Disconnect Session" aria-label="Disconnect">🚪</button>
+            <button id="btn-fullscreen" class="top-icon-btn" title="Toggle Fullscreen" aria-label="Fullscreen">⛶</button>
+          </div>
+        </div>
+
+        <!-- Right Shoulder Corner (RB & RT) -->
+        <div class="shoulder-group right-shoulders">
+          <button id="btn-rb" class="bumper-btn" data-input="RB" aria-label="Right Bumper Recovery">
+            <div class="bumper-lightbar"></div>
+            <div class="bumper-body">
+              <span class="bumper-name">RB</span>
+              <span class="action-tag">Use recovery items</span>
+            </div>
+          </button>
+          <button id="btn-rt" class="trigger-btn" data-input="RT" aria-label="Right Trigger Attack">
+            <div class="trigger-body">
+              <span class="trigger-name">RT</span>
+              <span class="action-tag">Attack</span>
+            </div>
+          </button>
+        </div>
+
+      </header>
+
+      <!-- Main Controller Interactive Surface -->
+      <main class="controller-surface">
+        
+        <!-- LEFT WING: Left Stick (LS), L3 Click, and D-Pad -->
+        <section class="controller-zone left-zone">
+          <div class="stick-cluster left-stick-cluster">
+            <div class="joystick-wrapper">
+              <div id="joystick-left-base" class="joystick-base">
+                <div class="stick-glow-ring"></div>
+                <div class="joystick-crosshairs"></div>
+                <div id="joystick-left-knob" class="joystick-knob">
+                  <div class="thumbstick-concave"></div>
+                </div>
+              </div>
+              <div class="control-callout callout-ls">
+                <span class="callout-title">Left Stick (LS)</span>
+                <span class="callout-desc">Move</span>
+              </div>
+            </div>
+
+            <!-- Left Stick Click (L3) -->
+            <div class="stick-click-wrap">
+              <button id="btn-l3" class="circle-click-btn" data-input="L3" aria-label="Left Stick Click Run">
+                <span class="click-label">L3</span>
+              </button>
+              <div class="control-callout callout-click">
+                <span class="callout-title">Left Stick Click (L3)</span>
+                <span class="callout-desc">Run</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Directional D-Pad (Up, Down, Left, Right) -->
+          <div class="dpad-cluster">
+            <div class="dpad-cross">
+              <button id="btn-dpad-up" class="dpad-dir dpad-up" data-input="DPadUp" aria-label="D-Pad Up">
+                <span class="dpad-arrow">▲</span>
+              </button>
+              <button id="btn-dpad-left" class="dpad-dir dpad-left" data-input="DPadLeft" aria-label="D-Pad Left">
+                <span class="dpad-arrow">◀</span>
+              </button>
+              <div class="dpad-center-hub"></div>
+              <button id="btn-dpad-right" class="dpad-dir dpad-right" data-input="DPadRight" aria-label="D-Pad Right">
+                <span class="dpad-arrow">▶</span>
+              </button>
+              <button id="btn-dpad-down" class="dpad-dir dpad-down" data-input="DPadDown" aria-label="D-Pad Down">
+                <span class="dpad-arrow">▼</span>
+              </button>
+            </div>
+            <div class="control-callout callout-dpad">
+              <span class="callout-title">D-Pad</span>
+              <span class="callout-desc">Up / Down / Left / Right</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- CENTER WING: View, Guide, Menu & Auxiliary Tactical Buttons -->
+        <section class="controller-zone center-zone">
+          <div class="center-nav-cluster">
+            <div class="nav-btn-wrap">
+              <button id="btn-view" class="nav-pill-btn" data-input="View" aria-label="View Open Map Journal">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="13" height="13" rx="2"></rect>
+                  <path d="M8 8h13v13H8z"></path>
+                </svg>
+              </button>
+              <div class="control-callout callout-center">
+                <span class="callout-title">View</span>
+                <span class="callout-desc">Open Map / Journal</span>
+              </div>
+            </div>
+
+            <div class="nav-btn-wrap guide-wrap">
+              <button id="btn-guide" class="guide-orb-btn" data-input="Guide" aria-label="Xbox Guide Button">
+                <div class="guide-logo-svg">
+                  <svg viewBox="0 0 100 100" class="guide-symbol">
+                    <circle cx="50" cy="50" r="46" fill="#111827" stroke="rgba(255,255,255,0.25)" stroke-width="3"/>
+                    <path d="M 23 29 C 32 39 42 45 50 48 C 58 45 68 39 77 29 C 73 21 62 14 50 14 C 38 14 27 21 23 29 Z" fill="#ffffff"/>
+                    <path d="M 18 36 C 25 50 35 62 48 76 C 36 78 26 73 18 64 C 14 55 14 45 18 36 Z" fill="#ffffff"/>
+                    <path d="M 82 36 C 86 45 86 55 82 64 C 74 73 64 78 52 76 C 65 62 75 50 82 36 Z" fill="#ffffff"/>
+                  </svg>
+                </div>
+              </button>
+              <div class="control-callout callout-center">
+                <span class="callout-title">Guide</span>
+                <span class="callout-desc">(Optional)</span>
+              </div>
+            </div>
+
+            <div class="nav-btn-wrap">
+              <button id="btn-menu" class="nav-pill-btn" data-input="Menu" aria-label="Menu Pause">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="4" y1="7" x2="20" y2="7"></line>
+                  <line x1="4" y1="12" x2="20" y2="12"></line>
+                  <line x1="4" y1="17" x2="20" y2="17"></line>
+                </svg>
+              </button>
+              <div class="control-callout callout-center">
+                <span class="callout-title">Menu</span>
+                <span class="callout-desc">Pause</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Real-Time Input HUD -->
+          <div class="compact-hud">
+            <div class="hud-item">
+              <span class="hud-label">LS:</span>
+              <span id="hud-ls" class="hud-val">X: +0.00 Y: +0.00</span>
+            </div>
+            <div class="hud-item">
+              <span class="hud-label">RS:</span>
+              <span id="hud-rs" class="hud-val">X: +0.00 Y: +0.00</span>
+            </div>
+            <div class="hud-item">
+              <span class="hud-label">ACTIVE:</span>
+              <span id="hud-buttons" class="hud-val-active">None</span>
+            </div>
+          </div>
+
+          <!-- Auxiliary Action Bar (Quick Turn, Run, Change Weapon) -->
+          <div class="aux-action-bar">
+            <button id="btn-quick-turn" class="aux-btn aux-quick-turn" data-input="QuickTurn" aria-label="Quick Turn L3 plus B">
+              <span class="aux-icon">🔄</span>
+              <div class="aux-texts">
+                <span class="aux-title">Quick Turn</span>
+                <span class="aux-sub">L3 + B</span>
+              </div>
+            </button>
+            <button id="btn-run" class="aux-btn aux-run" data-input="Run" aria-label="Run L3">
+              <span class="aux-icon">🏃</span>
+              <div class="aux-texts">
+                <span class="aux-title">Run</span>
+                <span class="aux-sub">L3</span>
+              </div>
+            </button>
+            <button id="btn-change-weapon" class="aux-btn aux-weapon" data-input="ChangeWeapon" aria-label="Change Weapon">
+              <span class="aux-icon">✛</span>
+              <div class="aux-texts">
+                <span class="aux-title">Change Weapon</span>
+              </div>
+            </button>
+          </div>
+        </section>
+
+        <!-- RIGHT WING: Action Buttons (ABXY), Right Stick (RS) & R3 Click -->
+        <section class="controller-zone right-zone">
+          <div class="action-diamond-cluster">
+            <div class="action-btn-wrap action-wrap-y">
+              <button id="btn-y" class="xbox-btn xbox-y" data-input="Y" aria-label="Y Open Inventory">
+                <span class="btn-letter">Y</span>
+              </button>
+              <div class="control-callout callout-action callout-action-y">
+                <span class="callout-title">Y</span>
+                <span class="callout-desc">Open Inventory</span>
+              </div>
+            </div>
+            <div class="action-btn-wrap action-wrap-x">
+              <button id="btn-x" class="xbox-btn xbox-x" data-input="X" aria-label="X Reload">
+                <span class="btn-letter">X</span>
+              </button>
+              <div class="control-callout callout-action callout-action-x">
+                <span class="callout-title">X</span>
+                <span class="callout-desc">Reload</span>
+              </div>
+            </div>
+            <div class="action-btn-wrap action-wrap-b">
+              <button id="btn-b" class="xbox-btn xbox-b" data-input="B" aria-label="B None Optional">
+                <span class="btn-letter">B</span>
+              </button>
+              <div class="control-callout callout-action callout-action-b">
+                <span class="callout-title">B</span>
+                <span class="callout-desc">None / Optional</span>
+              </div>
+            </div>
+            <div class="action-btn-wrap action-wrap-a">
+              <button id="btn-a" class="xbox-btn xbox-a" data-input="A" aria-label="A Examine Pick up item">
+                <span class="btn-letter">A</span>
+              </button>
+              <div class="control-callout callout-action callout-action-a">
+                <span class="callout-title">A</span>
+                <span class="callout-desc">Examine / Pick up item</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="stick-cluster right-stick-cluster">
+            <div class="joystick-wrapper">
+              <div id="joystick-right-base" class="joystick-base">
+                <div class="stick-glow-ring"></div>
+                <div class="joystick-crosshairs"></div>
+                <div id="joystick-right-knob" class="joystick-knob">
+                  <div class="thumbstick-concave"></div>
+                </div>
+              </div>
+              <div class="control-callout callout-rs">
+                <span class="callout-title">Right Stick (RS)</span>
+                <span class="callout-desc">View / Look</span>
+              </div>
+            </div>
+
+            <!-- Right Stick Click (R3) -->
+            <div class="stick-click-wrap">
+              <button id="btn-r3" class="circle-click-btn" data-input="R3" aria-label="Right Stick Click Crouch Stand">
+                <span class="click-label">R3</span>
+              </button>
+              <div class="control-callout callout-click">
+                <span class="callout-title">Right Stick Click (R3)</span>
+                <span class="callout-desc">Crouch / Stand</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </section>
+
+  <!-- Modal: Live Event Logger -->
+  <div id="modal-log" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Live Input Event Log</h3>
+        <button id="btn-close-log" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="log-actions">
+          <button id="btn-test-quickturn" class="btn-secondary">Test Quick Turn (L3+B)</button>
+          <button id="btn-test-dualstick" class="btn-secondary">Test Dual Sticks</button>
+          <button id="btn-test-triggers" class="btn-secondary">Test LT + RT</button>
+          <button id="btn-clear-log" class="btn-secondary">Clear</button>
+        </div>
+        <pre id="log-output" class="log-output">Awaiting touches...</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Settings & Key Mappings -->
+  <div id="modal-settings" class="modal-backdrop hidden">
+    <div class="modal-box modal-wide">
+      <div class="modal-header">
+        <h3>Controller Settings & Mappings</h3>
+        <button id="btn-close-settings" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-grid-layout">
+          <div class="settings-column">
+            <h4>Joystick Calibration</h4>
+            <div class="setting-item">
+              <label for="setting-deadzone-ls">LS Deadzone (<span id="val-deadzone-ls">0.08</span>)</label>
+              <input type="range" id="setting-deadzone-ls" min="0" max="0.3" step="0.01" value="0.08">
+            </div>
+            <div class="setting-item">
+              <label for="setting-sens-ls">LS Sensitivity (<span id="val-sens-ls">1.0</span>)</label>
+              <input type="range" id="setting-sens-ls" min="0.5" max="2.0" step="0.1" value="1.0">
+            </div>
+            <div class="setting-item">
+              <label for="setting-deadzone-rs">RS Deadzone (<span id="val-deadzone-rs">0.08</span>)</label>
+              <input type="range" id="setting-deadzone-rs" min="0" max="0.3" step="0.01" value="0.08">
+            </div>
+            <div class="setting-item">
+              <label for="setting-sens-rs">RS Sensitivity (<span id="val-sens-rs">1.0</span>)</label>
+              <input type="range" id="setting-sens-rs" min="0.5" max="2.0" step="0.1" value="1.0">
+            </div>
+
+            <h4 style="margin-top: 14px;">Preferences & Modes</h4>
+            <div class="setting-item">
+              <label for="setting-ui-scale">UI Scale (<span id="val-ui-scale">100%</span>)</label>
+              <input type="range" id="setting-ui-scale" min="0.8" max="1.2" step="0.05" value="1.0">
+            </div>
+            <div class="setting-item checkbox-item">
+              <label for="setting-show-labels">Display Action Sub-Labels</label>
+              <input type="checkbox" id="setting-show-labels" checked>
+            </div>
+            <div class="setting-item checkbox-item">
+              <label for="setting-run-toggle">Run (L3) Toggle Mode</label>
+              <input type="checkbox" id="setting-run-toggle">
+            </div>
+            <div class="setting-item checkbox-item">
+              <label for="setting-aim-toggle">Aim (LT) Toggle Mode</label>
+              <input type="checkbox" id="setting-aim-toggle">
+            </div>
+            <div class="setting-item checkbox-item">
+              <label for="setting-haptics">Haptic Vibration on Tap</label>
+              <input type="checkbox" id="setting-haptics" checked>
+            </div>
+          </div>
+
+          <div class="settings-column">
+            <h4>Mac Keyboard Mappings</h4>
+            <div class="mapping-table" id="mapping-grid"></div>
+          </div>
+        </div>
+
+        <div class="settings-actions">
+          <button id="btn-reset-settings" class="btn-danger">Reset Defaults</button>
+          <button id="btn-save-settings" class="btn-primary">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Session & Pairing Info -->
+  <div id="modal-pairing" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Connection & Pairing Info</h3>
+        <button id="btn-close-pairing" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 12px; color: #a1a1aa; font-size: 0.9rem;">
+          Active session status and real-time network parameters.
+        </p>
+        <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 14px; font-family: monospace; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.08);">
+          <div style="margin-bottom: 8px; display: flex; justify-content: space-between;">
+            <span style="color: #94a3b8;">Status:</span>
+            <span id="modal-pair-status" style="color: #4ade80; font-weight: bold;">Connected</span>
+          </div>
+          <div style="margin-bottom: 8px; display: flex; justify-content: space-between;">
+            <span style="color: #94a3b8;">Round-Trip Ping:</span>
+            <span id="modal-pair-ping" style="color: #38bdf8;">-- ms</span>
+          </div>
+          <div style="margin-bottom: 8px; display: flex; justify-content: space-between;">
+            <span style="color: #94a3b8;">Fail-Safe Watchdog:</span>
+            <span style="color: #4ade80;">Active (400ms)</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: #94a3b8;">Encryption:</span>
+            <span style="color: #e2e8f0;">WebSocket</span>
+          </div>
+        </div>
+        <div style="margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end;">
+          <button id="btn-modal-disconnect" class="btn-danger" style="padding: 8px 16px; font-size: 0.85rem;">Disconnect Session</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/qrcode.js"></script>
+  <script src="js/session.js"></script>
+  <script src="js/scanner.js"></script>
+  <script src="js/ws.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/controller.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
